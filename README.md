@@ -26,6 +26,23 @@ Account-level dashboard LWC for gaming/casino environments. Shows fleet health, 
 - **Competitor Landscape** - Competitor brand breakdown with one-click replacement opportunity
 - **Service Issues** - Open Cases and Work Orders by priority
 
+## Data Model
+
+The dashboard distinguishes between **your assets** and **competitor assets** using standard and custom fields on the Asset object:
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `IsCompetitorProduct` | Standard Checkbox | Set to `true` for competitor machines, `false` for your own fleet |
+| `Description` | Standard Text Area | Stores the competitor brand name (e.g., "IGT", "Light & Wonder", "Konami") - only used on competitor assets |
+| `ParentId` | Standard Lookup | Assets with no parent (`ParentId = null`) are treated as top-level EGMs. Child assets (monitors, bill acceptors, printers) have a parent and are counted as components |
+| `Asset_Level__c` | Custom Formula Checkbox | Auto-calculated: `ISBLANK(ParentId)` - returns `true` for main assets, `false` for components |
+
+**How the component uses this:**
+- **Fleet Composition** counts only assets where `IsCompetitorProduct = false` and `ParentId = null` (your top-level EGMs)
+- **Competitor Landscape** counts only assets where `IsCompetitorProduct = true` and `ParentId = null`, grouped by the `Description` field (brand name)
+- **Components** are all child assets (`ParentId != null`) regardless of competitor status
+- **Generate Replacement Opportunity** maps competitor brands from the `Description` field to recommended products using the `BRAND_TO_PRODUCT` map in the controller
+
 ## Prerequisites
 
 - Salesforce org with **Asset Management** enabled
