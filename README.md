@@ -1,4 +1,4 @@
-# SFS RN Floor Intelligence
+# SFS - Floor Intelligence
 
 <p align="center">
   <img src="assets/screenshot.png" alt="Floor Intelligence Dashboard" width="100%">
