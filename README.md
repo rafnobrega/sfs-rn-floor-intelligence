@@ -13,7 +13,6 @@ Account-level dashboard LWC for gaming/casino environments. Shows fleet health, 
 | `SFS_RN_FloorIntelligenceCtrl` | Apex Class | Controller with fleet analytics, health scoring, and opportunity generation |
 | `SFS_RN_FloorIntelligenceCtrlTest` | Apex Test | 6 test methods, 90%+ coverage |
 | `sfsRnFloorIntelligence` | LWC | Main dashboard component (Account record page) |
-| `sfsRnDeleteOpportunity` | LWC | Quick action to delete replacement opportunities |
 | `Opportunity.SFS_RN_Delete_Opportunity` | Quick Action | Wired to the delete LWC |
 | 8 Custom Fields on Asset | CustomField | Cabinet_Model__c, Asset_Class__c, Firmware/Software_Version__c, Availability/Reliability, Asset_Level__c, Location_on_Floor__c |
 
