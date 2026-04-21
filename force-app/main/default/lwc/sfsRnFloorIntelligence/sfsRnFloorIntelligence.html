@@ -1,0 +1,188 @@
+<template>
+    <lightning-card icon-name="custom:custom62">
+        <div slot="title" class="card-title-row" onclick={toggleCollapse}>
+            <lightning-icon icon-name={collapseIcon} size="xx-small" class="collapse-chevron"></lightning-icon>
+            <h1 class="card-title">Floor Intelligence</h1>
+        </div>
+
+        <template lwc:if={isExpanded}>
+        <template lwc:if={isLoading}>
+            <div class="slds-is-relative loading-container">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template lwc:if={error}>
+            <div class="slds-p-around_medium">
+                <p class="slds-text-color_error">{error}</p>
+            </div>
+        </template>
+
+        <template lwc:if={noData}>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-color_weak">No assets found for this account.</p>
+            </div>
+        </template>
+
+        <template lwc:if={hasData}>
+            <div class="stats-row slds-p-around_small">
+                <div class="stat-card">
+                    <div class="stat-value">{data.totalEgms}</div>
+                    <div class="stat-label">EGM Fleet</div>
+                    <div class="stat-sub">{data.totalComponents} components</div>
+                </div>
+
+                <div class={healthClass}>
+                    <div class="stat-value">{healthDisplay}<span class="stat-unit">%</span></div>
+                    <div class="stat-label">Health Score</div>
+                    <div class="stat-sub">Avail + Reliability</div>
+                </div>
+
+                <div class={warrantyClass}>
+                    <div class="stat-value">{data.warrantyCoveragePct}<span class="stat-unit">%</span></div>
+                    <div class="stat-label">Warranty</div>
+                    <div class="stat-sub">{data.warrantyExp30} expiring in 30d</div>
+                </div>
+
+                <div class={auditClass}>
+                    <div class="stat-value">{data.overdueCount}</div>
+                    <div class="stat-label">Overdue Audits</div>
+                    <div class="stat-sub">{data.compliantCount} compliant</div>
+                </div>
+
+                <div class={firmwareClass}>
+                    <div class="stat-value">{data.outdatedCount}</div>
+                    <div class="stat-label">Outdated Firmware</div>
+                    <div class="stat-sub">{data.currentCount} current</div>
+                </div>
+
+                <div class={serviceClass}>
+                    <div class="stat-value">{totalServiceIssues}</div>
+                    <div class="stat-label">Open Issues</div>
+                    <div class="stat-sub">{data.openCases} cases / {data.openWorkOrders} WOs</div>
+                </div>
+            </div>
+
+            <div class="detail-grid slds-p-horizontal_small slds-p-bottom_small">
+                <div class="detail-card">
+                    <h3 class="detail-title">
+                        <lightning-icon icon-name="utility:chart" size="xx-small" class="title-icon"></lightning-icon>
+                        Fleet Composition
+                    </h3>
+                    <div class="detail-body">
+                        <template for:each={data.modelBreakdown} for:item="item">
+                            <div key={item.label} class="breakdown-row">
+                                <span class="breakdown-label">{item.label}</span>
+                                <span class="breakdown-count">{item.count}</span>
+                            </div>
+                        </template>
+                        <div class="breakdown-divider"></div>
+                        <template for:each={data.classBreakdown} for:item="item">
+                            <div key={item.label} class="breakdown-row">
+                                <span class="breakdown-label">{item.label}</span>
+                                <span class="breakdown-count">{item.count}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3 class="detail-title">
+                        <lightning-icon icon-name="utility:strategy" size="xx-small" class="title-icon"></lightning-icon>
+                        Competitor Landscape
+                        <template lwc:if={hasCompetitors}>
+                            <span class="badge badge-blue">{data.competitorCount} machines</span>
+                        </template>
+                    </h3>
+                    <div class="detail-body">
+                        <template lwc:if={hasCompetitors}>
+                            <template for:each={data.competitorBreakdown} for:item="item">
+                                <div key={item.label} class="breakdown-row">
+                                    <span class="breakdown-label">{item.label}</span>
+                                    <span class="breakdown-count">{item.count}</span>
+                                </div>
+                            </template>
+                            <template lwc:if={hasReplacementOpp}>
+                                <div class="opp-created" onclick={navigateToOpp}>
+                                    <lightning-icon icon-name="utility:check" size="xx-small" variant="success" class="opp-check-icon"></lightning-icon>
+                                    <span class="opp-created-text">Opportunity created</span>
+                                    <template lwc:if={replacementOppAmount}>
+                                        <span class="opp-amount">{replacementOppAmount}</span>
+                                    </template>
+                                </div>
+                            </template>
+                            <template lwc:else>
+                                <button class="replacement-btn" onclick={handleCreateOpportunity} disabled={isCreatingOpp}>
+                                    <template lwc:if={isCreatingOpp}>
+                                        <lightning-spinner alternative-text="Creating" size="xx-small"></lightning-spinner>
+                                    </template>
+                                    <template lwc:else>
+                                        Generate Replacement Opportunity
+                                    </template>
+                                </button>
+                            </template>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">No competitor machines identified</div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="detail-card detail-card-wide">
+                    <h3 class="detail-title">
+                        <lightning-icon icon-name="utility:warning" size="xx-small" class="title-icon"></lightning-icon>
+                        Assets Requiring Attention
+                    </h3>
+                    <div class="detail-body attention-list">
+                        <template lwc:if={hasAttentionItems}>
+                            <template for:each={attentionItems} for:item="item">
+                                <div key={item.key} class="attention-row">
+                                    <div class="attention-header">
+                                        <span class={item.badgeClass}>{item.badgeLabel}</span>
+                                        <a data-id={item.assetId} onclick={navigateToAsset} class="attention-link">{item.assetName}</a>
+                                    </div>
+                                    <div class="attention-detail">{item.issue}</div>
+                                </div>
+                            </template>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state good-state">All assets in good standing</div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warranty-row slds-p-horizontal_small slds-p-bottom_small">
+                <div class="detail-card">
+                    <h3 class="detail-title">
+                        <lightning-icon icon-name="utility:date_input" size="xx-small" class="title-icon"></lightning-icon>
+                        Warranty Expiration Timeline
+                    </h3>
+                    <div class="warranty-buckets">
+                        <div class="warranty-bucket">
+                            <span class="bucket-count bucket-red">{data.warrantyExp30}</span>
+                            <span class="bucket-label">Within 30 days</span>
+                        </div>
+                        <div class="warranty-bucket">
+                            <span class="bucket-count bucket-orange">{data.warrantyExp60}</span>
+                            <span class="bucket-label">31 - 60 days</span>
+                        </div>
+                        <div class="warranty-bucket">
+                            <span class="bucket-count bucket-gray">{data.warrantyExp90}</span>
+                            <span class="bucket-label">61 - 90 days</span>
+                        </div>
+                        <div class="warranty-bucket">
+                            <span class="bucket-count bucket-green">{data.warrantyCovered}</span>
+                            <span class="bucket-label">Active Coverage</span>
+                        </div>
+                        <div class="warranty-bucket">
+                            <span class="bucket-count bucket-red">{data.warrantyUncovered}</span>
+                            <span class="bucket-label">No Coverage</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        </template>
+    </lightning-card>
+</template>

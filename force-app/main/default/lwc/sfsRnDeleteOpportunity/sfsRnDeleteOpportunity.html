@@ -1,0 +1,19 @@
+<template>
+    <lightning-quick-action-panel header="Delete Opportunity">
+        <div class="slds-p-around_medium">
+            <p class="slds-text-body_regular">
+                This will permanently delete this replacement opportunity and its line items.
+                You can regenerate it from the Floor Intelligence dashboard.
+            </p>
+        </div>
+        <div slot="footer">
+            <lightning-button label="Cancel" onclick={handleCancel} class="slds-m-right_x-small"></lightning-button>
+            <lightning-button
+                label="Delete"
+                variant="destructive"
+                onclick={handleDelete}
+                disabled={isDeleting}
+            ></lightning-button>
+        </div>
+    </lightning-quick-action-panel>
+</template>
