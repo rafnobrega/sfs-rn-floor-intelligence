@@ -1,5 +1,9 @@
 # SFS RN Floor Intelligence
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="Floor Intelligence Dashboard" width="100%">
+</p>
+
 Account-level dashboard LWC for gaming/casino environments. Shows fleet health, competitor landscape, warranty coverage, regulatory compliance, firmware status, and service issues for gaming assets (EGMs). Includes one-click competitor replacement opportunity generation.
 
 ## What's Included
